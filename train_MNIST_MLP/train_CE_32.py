@@ -10,7 +10,7 @@ from time import localtime, strftime
 import math
 
 # MNIST dataset, 1K samples
-train_dataset = torchvision.datasets.MNIST(root='../data', 
+train_dataset = torchvision.datasets.MNIST(root='../datasets', 
                                            train=True, 
                                            transform=transforms.ToTensor(),  
                                            download=True)
@@ -23,8 +23,9 @@ with open('../datasets/subsample_train_indices.pkl', 'rb') as f:
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=200, 
                                            sampler=SubsetRandomSampler(subsample_train_indices)) 
 
-# Number of optimizer iterations to run, this is the number used in the paper.
-its_end = int(1e3) # int(1e7)
+# Number of optimizer iterations to run, this is the number used in the paper:
+# its_end = int(1e7)
+its_end = int(1e3) 
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 

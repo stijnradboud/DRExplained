@@ -13,11 +13,10 @@ These can be evaluated using the 'eval_' scripts in 'eval_MNIST_MLP' and 'eval_C
 
 They produce plots that go into the 'plots' subfolder.
 
-The plots should be reproductions of our main figures.
-
-Reqs:
+Reqs (version used):
 * python (v3.11.9)
 * pythorch (including torchvision etc.) (v2.5.1)
 * Matplotlib (3.9.2)
 * Numpy (1.24.3)
-* Autoattack (see: https://github.com/fra31/auto-attack).
+* tqdm (4.67.1)
+* Auto-Attack (see: https://github.com/fra31/auto-attack, 'conda list' returns v0.1).

@@ -1,4 +1,4 @@
-import torch as ch
+import torch as torch
 import torchvision
 from torchvision import transforms
 from torch.nn import CrossEntropyLoss
@@ -6,6 +6,7 @@ from torch.optim import SGD, lr_scheduler, AdamW
 import numpy as np
 import gc
 import matplotlib.pyplot as plt
+import math
 
 from utils import flatten_model
 from local_complexity import get_intersections_for_hulls
@@ -19,20 +20,19 @@ THIS FILE USES A LOT OF CODE FROM HUMAYUN ET AL. (https://github.com/AhmedImtiaz
 THIS FILE ASSUMES ALL THE MNIST MLP TRAIN SCRIPTS WERE RUN AS PROVIDED.
 
 IF THIS IS NOT THE CASE:
-    REMOVE THE LIST (EXPERIMENT, N_ITERATIONS) BELOW
+    UPDATE THE LIST (EXPERIMENT, N_ITERATIONS) BELOW
     POSSIBLY ALSO UPDATE THE CHECKPOINTING SCHEME
 '''
 
-experiments = [(f"MSE_eps={1e-8}", int(1e7)), ("MSE_eps=AMSGrad", int(1e7)), ("CE_32", int(1e7), ("CE_64", int(1e7)))]
+experiments = [(f"MSE_eps={1e-8}", int(1e3)), ("MSE_eps=AMSGrad", int(1e3)), ("CE_32", int(1e3)), ("CE_64", int(1e3))]
 
-import math
 def get_checkpoints(its_end):
     checkpoints = []
     for its in range(1, its_end+1):
         if its >= 10:
-            log = its % (10**(math.floor(math.log10(its)))-1) == 0
+            log = its % (10**(math.floor(math.log10(its))-1)) == 0
         else:
-            log = True
+            log = True   
         if log:
             checkpoints.append(its)
     return checkpoints
@@ -50,7 +50,7 @@ config_LC_batch_size = 200
 config_inc_centroid = False                     # include original sample as neighborhood vertex
 config_seed = 42
 
-device = ch.device("cuda")
+device = torch.device("cuda")
 
 def eval_LC(model, loaders, add_hook_fn, hulls=None):
 
@@ -63,7 +63,7 @@ def eval_LC(model, loaders, add_hook_fn, hulls=None):
           # compute number of neurons that intersect hulls
           # using network activations
         
-          with ch.no_grad():
+          with torch.no_grad():
         
             n_inters, _ = get_intersections_for_hulls(
                             hulls[k],
@@ -81,7 +81,7 @@ def add_hooks(model, verbose=False):
     assert len(names) == len(modules)
     
     ## add hooks to bns only. bn outputs are always passed through relus (even for skip connections)
-    hook_module = ch.nn.modules.Linear
+    hook_module = torch.nn.modules.Linear
     layer_ids = np.asarray([i for i,each in enumerate(modules) if (type(each)==hook_module)])
     
     activation = {}
@@ -120,8 +120,8 @@ def get_LC_samples(dloader, device):
         if size >= config_approx_n: break
 
     ## concat and keep LC_batch_size
-    samples = ch.concatenate(samples,axis=0)[:config_approx_n]
-    labels = ch.concatenate(labels,axis=0)[:config_approx_n]
+    samples = torch.concatenate(samples,axis=0)[:config_approx_n]
+    labels = torch.concatenate(labels,axis=0)[:config_approx_n]
 
     return samples, labels
 
@@ -155,9 +155,9 @@ with open('../datasets/subsample_train_indices.pkl', 'rb') as f:
 
 train_eval_subset = Subset(train_dataset, subsample_train_indices)
 # Data loader
-train_loader = ch.utils.data.DataLoader(train_eval_subset, batch_size=config_LC_batch_size, shuffle=False) 
+train_loader = torch.utils.data.DataLoader(train_eval_subset, batch_size=config_LC_batch_size, shuffle=False) 
 
-test_loader = ch.utils.data.DataLoader(dataset=test_dataset, 
+test_loader = torch.utils.data.DataLoader(dataset=test_dataset, 
                                           batch_size=config_LC_batch_size, 
                                           shuffle=False)
 ## initialize neighborhood sampler
@@ -171,7 +171,7 @@ sampler = get_ortho_hull_around_samples_w_orig if config_inc_centroid \
 ## select samples for neighborhood computation
 train_LC_batch, _ = get_LC_samples(train_loader, device)
 test_LC_batch, _ = get_LC_samples(test_loader, device)
-rand_LC_batch = ch.rand_like(test_LC_batch)   ## Data domain [0,1]
+rand_LC_batch = torch.rand_like(test_LC_batch)   ## Data domain [0,1]
 
 
 ## sample hulls/neighborhoods
@@ -215,7 +215,8 @@ for exp, its_end in experiments:
     its = get_checkpoints(its_end)
 
     for i in its:
-        model = ch.load(f"../checkpoints/models_MIST/models_{exp}/model_at_{i}_its.ckpt", weights_only = False, map_location=ch.device('cuda'))
+        model = torch.load(f"../checkpoints/models_MNIST/models_{exp}/model_at_{i}_its.ckpt", weights_only = False, map_location=torch.device('cuda'))
+        model.to(torch.float32)
         model.eval()
         stats = eval_LC(model, loaders,
             hulls=hulls,
@@ -224,7 +225,7 @@ for exp, its_end in experiments:
         train_lcs.append(stats[0].sum(1).mean(0).cpu().item())
         test_lcs.append(stats[1].sum(1).mean(0).cpu().item())
         random_lcs.append(stats[2].sum(1).mean(0).cpu().item())
-        ch.cuda.empty_cache()
+        torch.cuda.empty_cache()
         gc.collect()
 
     plt.plot(its, train_lcs, label='train')

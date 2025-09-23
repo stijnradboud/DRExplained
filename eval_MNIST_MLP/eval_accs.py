@@ -23,7 +23,7 @@ IF THIS IS NOT THE CASE:
 
 experiments = [(f"MSE_eps={1e-8}", int(1e3), "MSE", 32), (f"MSE_eps={1e-4}", int(1e3), "MSE", 32), 
                ("MSE_eps=AMSGrad", int(1e3), "MSE", 32), ("CE_32", int(1e3), "CE", 32), ("CE_64", int(1e3), "CE", 64)]
-experiments = [("CE_32", int(1e3), "CE", 32), ("CE_64", int(1e3), "CE", 64),("MSE_eps=AMSGrad", int(1e3), "MSE", 32)]
+
 # checkpointing scheme (logarithmic, see train scripts)
 def get_checkpoints(its_end):
     checkpoints = []
@@ -59,10 +59,8 @@ def get_metrics(model_dir, to_log, train_dataloader, test_dataloader, device, e=
         return -1
     
     res_own = []
-    print("starting ", exp)
-    for its in to_log:
 
-        print("\tstarting ", its)
+    for its in to_log:
         model = torch.load(f"{model_dir}/model_at_{its}_its.ckpt", weights_only=False, map_location=device)
 
         att_PGD = get_att_PGD(model)
@@ -131,8 +129,8 @@ def get_metrics(model_dir, to_log, train_dataloader, test_dataloader, device, e=
                 
             # Adversarial accuracy 32-bit PGD
             with torch.no_grad():
-                adv_outputs_32 = model(adv_images_pgd)
-                _, predicted = torch.max(adv_outputs_32.data, 1)
+                adv_outputs = model(adv_images_pgd)
+                _, predicted = torch.max(adv_outputs.data, 1)
                 correct_adv_PGD += (predicted == labels).sum().item()
 
             # Adversarial accuracy scaled PGD
@@ -191,7 +189,8 @@ for exp, its, loss_fn, prec in experiments:
     axs.plot(checkpoints, train_acc, color='blue', label='Train Accuracy')
     axs.plot(checkpoints, test_acc, color='orange', label='Test Accuracy')
     axs.plot(checkpoints, adv_acc_PGD, color='red', label='Adv. Accuracy (PGD, ε = 0.06)')
-    axs.plot(checkpoints, adv_acc_ScaledPGD, color='purple', label='Adv. Accuracy (ScaledPGD, , ε = 0.06)') 
+    if loss_fn == "CE": 
+        axs.plot(checkpoints, adv_acc_ScaledPGD, color='purple', label='Adv. Accuracy (ScaledPGD, , ε = 0.06)') 
     axs.set_xscale("log")
     axs.set_xlabel("Optimizer Iterations")
     axs.set_ylabel("Accuracy (%)")
@@ -214,5 +213,5 @@ for exp, its, loss_fn, prec in experiments:
 
     plt.tight_layout()
 
-    plt.savefig(f"../plots/ACCURACY PLOT - MNIST MPL - {exp}.pdf", dpi=300, bbox_inches='tight')
+    plt.savefig(f"../plots/Accuracy - MNIST MLP - {exp}.png", dpi=300, bbox_inches='tight')
     plt.close()

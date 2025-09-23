@@ -10,6 +10,11 @@ from time import localtime, strftime
 import math
 import torch.multiprocessing as mp
 
+# Number of optimizer iterations to run, this is the number used in the paper.
+# its_end = int(1e7)
+# Can be reduced massively to still show the effect of AMSGrad on delayed robustness
+its_end = int(1e3)
+
 def train_network(eps=1e-8, device='cuda:0'):
     
     out_file=f"../logs/output_MNIST_MSE_eps={eps}.txt"
@@ -68,10 +73,6 @@ def train_network(eps=1e-8, device='cuda:0'):
         
         its = 0
         model.train()
-
-        # Number of optimizer iterations to run, this is the number used in the paper.
-        # Can be reduced massively to still show the effect of AMSGrad on delayed robustness
-        its_end = int(1e3)
 
         torch.save(model, f'{modeldir}/model_at_{its}_its.ckpt')
 

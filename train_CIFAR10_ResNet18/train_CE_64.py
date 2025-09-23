@@ -6,18 +6,19 @@ import torchvision.transforms as transforms
 import os
 from time import localtime, strftime
 import math
-from utils.resnet18 import make_resnet18k
+from resnet18 import make_resnet18k
 
 # Full CIFAR10 train set
-train_dataset = torchvision.datasets.CIFAR10(root='data', 
+train_dataset = torchvision.datasets.CIFAR10(root='../datasets', 
                                            train=True, 
                                            transform=transforms.ToTensor(),  
                                            download=False)
 
 
 # Number of optimizer iterations to run, this is the number used in the paper.
-# Note that 64-bit training for resnets can be VERY slow.
-its_end = int(1e6)
+# its_end = int(1e6)
+# Please be aware also that training a Resnet in 64 bit can be very slow
+its_end = int(1e2)
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -70,9 +71,9 @@ while its < its_end + 1:
         # Logarithmic checkpointing
         # [1, .., 10], [11, ..., 99], [100, 110, ..., 990], [1000, 1100, ..., 9900], ...
         if its >= 10:
-            log = its % (10**(math.floor(math.log10(its)))-1) == 0
+            log = its % (10**(math.floor(math.log10(its))-1)) == 0
         else:
-            log = True
+            log = True 
 
         if log:
             torch.save(model, f'{modeldir}/model_at_{its}_its.ckpt')
