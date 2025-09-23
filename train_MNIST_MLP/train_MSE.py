@@ -14,11 +14,13 @@ def train_network(eps=1e-8, device='cuda:0'):
     
     out_file=f"../logs/output_MNIST_MSE_eps={eps}.txt"
     
-    try:        
+    try:    
+
         train_dataset = torchvision.datasets.MNIST(root='../datasets', 
                                                    train=True, 
                                                    transform=transforms.ToTensor(),  
                                                    download=True)
+            
         # Load the 1000 indices
         with open('../datasets/subsample_train_indices.pkl', 'rb') as f:
             subsample_train_indices = pickle.load(f)
@@ -69,7 +71,7 @@ def train_network(eps=1e-8, device='cuda:0'):
 
         # Number of optimizer iterations to run, this is the number used in the paper.
         # Can be reduced massively to still show the effect of AMSGrad on delayed robustness
-        its_end = int(1e7)
+        its_end = int(1e3)
 
         torch.save(model, f'{modeldir}/model_at_{its}_its.ckpt')
 
@@ -114,6 +116,13 @@ def train_network(eps=1e-8, device='cuda:0'):
 
 if __name__ == '__main__':
     mp.set_start_method('spawn')
+
+    # will download the dataset if it does not exist yet so that does not happen in each subprocess.
+
+    _ = torchvision.datasets.MNIST(root='../datasets', 
+                                                   train=True, 
+                                                   transform=transforms.ToTensor(),  
+                                                   download=True)
 
     processes = []
     # The three experiments, different Adam epsilons (refered to with delta in the paper) and AMSGrad

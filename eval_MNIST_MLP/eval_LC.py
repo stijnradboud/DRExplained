@@ -234,5 +234,5 @@ for exp, its_end in experiments:
     plt.legend()
     plt.xlabel("Iterations")
     plt.ylabel("LC")
-    plt.savefig(f"plots/Local Complexity - MNIST MLP - {exp}.pdf")
+    plt.savefig(f"../plots/Local Complexity - MNIST MLP - {exp}.pdf")
     plt.close()

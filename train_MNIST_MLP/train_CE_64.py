@@ -10,7 +10,7 @@ from time import localtime, strftime
 import math
 
 # MNIST dataset, 1K samples
-train_dataset = torchvision.datasets.MNIST(root='data', 
+train_dataset = torchvision.datasets.MNIST(root='../data', 
                                            train=True, 
                                            transform=transforms.ToTensor(),  
                                            download=True)
@@ -24,11 +24,11 @@ train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=200,
                                            sampler=SubsetRandomSampler(subsample_train_indices)) 
 
 # Number of optimizer iterations to run, this is the number used in the paper.
-its_end = int(1e7)
+its_end = int(1e3) # int(1e7)
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-out_file="../logs/output_MNIST_CE_32.txt"
+out_file="../logs/output_MNIST_CE_64.txt"
 
 with open(out_file, "a") as f:
     f.write(f"Device = {device}\n")
@@ -36,7 +36,7 @@ with open(out_file, "a") as f:
 # Seed for the model and dataloader shuffling
 seed = 42
 
-modeldir = f'../checkpoints/models_MNIST/models_CE_32'
+modeldir = f'../checkpoints/models_MNIST/models_CE_64'
 os.makedirs(modeldir, exist_ok=True)
 torch.manual_seed(seed)
 
@@ -82,9 +82,9 @@ while its < its_end + 1:
         # Logarithmic checkpointing
         # [1, .., 10], [11, ..., 99], [100, 110, ..., 990], [1000, 1100, ..., 9900], ...
         if its >= 10:
-            log = its % (10**(math.floor(math.log10(its)))-1) == 0
+            log = its % (10**(math.floor(math.log10(its))-1)) == 0
         else:
-            log = True
+            log = True 
 
         if log:
             torch.save(model, f'{modeldir}/model_at_{its}_its.ckpt')

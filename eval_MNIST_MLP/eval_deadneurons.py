@@ -16,7 +16,7 @@ IF THIS IS NOT THE CASE:
     POSSIBLY ALSO UPDATE THE CHECKPOINTING SCHEME
 '''
 
-experiments = [(f"MSE_eps={1e-8}", int(1e7)), ("MSE_eps=AMSGrad", int(1e7)), ("CE_32", int(1e7), ("CE_64", int(1e7)))]
+experiments = [(f"MSE_eps={1e-8}", int(1e3)), ("MSE_eps=AMSGrad", int(1e3)), ("CE_32", int(1e3), ("CE_64", int(1e3)))]
 
 def get_checkpoints(its_end):
     checkpoints = []

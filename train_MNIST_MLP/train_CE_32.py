@@ -10,7 +10,7 @@ from time import localtime, strftime
 import math
 
 # MNIST dataset, 1K samples
-train_dataset = torchvision.datasets.MNIST(root='data', 
+train_dataset = torchvision.datasets.MNIST(root='../data', 
                                            train=True, 
                                            transform=transforms.ToTensor(),  
                                            download=True)
@@ -24,7 +24,7 @@ train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=200,
                                            sampler=SubsetRandomSampler(subsample_train_indices)) 
 
 # Number of optimizer iterations to run, this is the number used in the paper.
-its_end = int(1e7)
+its_end = int(1e3) # int(1e7)
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -71,6 +71,7 @@ while its < its_end + 1:
         labels = labels.to(device)
 
         outputs = model(images)
+        
         loss = criterion(outputs, labels) 
 
         optimizer.zero_grad()
@@ -82,9 +83,9 @@ while its < its_end + 1:
         # Logarithmic checkpointing
         # [1, .., 10], [11, ..., 99], [100, 110, ..., 990], [1000, 1100, ..., 9900], ...
         if its >= 10:
-            log = its % (10**(math.floor(math.log10(its)))-1) == 0
+            log = its % (10**(math.floor(math.log10(its))-1)) == 0
         else:
-            log = True
+            log = True 
 
         if log:
             torch.save(model, f'{modeldir}/model_at_{its}_its.ckpt')
