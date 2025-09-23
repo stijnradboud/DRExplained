@@ -59,7 +59,7 @@ def train_network(eps=1e-8, device='cuda:0'):
         
         criterion = torch.nn.MSELoss()
 
-        if eps == "ams":
+        if eps == "AMSGrad":
             optimizer = torch.optim.Adam(model.parameters(), amsgrad=True) 
         else:
             optimizer = torch.optim.Adam(model.parameters(), eps=eps) 
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
     processes = []
     # The three experiments, different Adam epsilons (refered to with delta in the paper) and AMSGrad
-    for eps in [1e-4, 1e-8, "ams"]:
+    for eps in [1e-4, 1e-8, "AMSGrad"]:
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         p = mp.Process(target=train_network, args=(eps, device))
         p.start()

@@ -16,7 +16,7 @@ train_dataset = torchvision.datasets.MNIST(root='data',
                                            download=True)
 
 # Load the indices of the 1k susbet
-with open('subsample_train_indices.pkl', 'rb') as f:
+with open('../datasets/subsample_train_indices.pkl', 'rb') as f:
     subsample_train_indices = pickle.load(f)
 
 # Data loader
@@ -24,7 +24,7 @@ train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=200,
                                            sampler=SubsetRandomSampler(subsample_train_indices)) 
 
 # Number of optimizer iterations to run, this is the number used in the paper.
-its_end = int(1e6)
+its_end = int(1e7)
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
