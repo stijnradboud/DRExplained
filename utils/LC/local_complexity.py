@@ -3,7 +3,6 @@ import torch
 import numpy as np
 import warnings
 import time
-import gc
 
 @torch.no_grad()
 @torch.jit.script

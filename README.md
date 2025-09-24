@@ -5,11 +5,13 @@ This is the repository for the paper "Is Delayed Robustness Really Grokking?".
 
 The main purpose of this repo is to provide code to reproduce our results.
 
-In 'train_MNIST_MLP' and 'train_CIFAR10_ResNet18' one can find scripts to train networks like the ones in the paper.
+Run train_MNIST_MLPs.py and/or train_CIFAR10_ResNet18s.py to train networks. 
+See the scripts themselves for configuration.
 
-This will store networks in the 'checkpoints' subfolder(s).
+These will store networks in the 'checkpoints' subfolder(s). You can track their progress using the files in the 'logs' subdirectory.
 
-These can be evaluated using the 'eval_' scripts in 'eval_MNIST_MLP' and 'eval_CIFAR10_ResNet18'.
+These stored networks can be evaluated using 'eval_MNIST_MLPs.py' and 'eval_CIFAR10_ResNet18s.py' scripts.
+See these scripts themselves for configuration.
 
 They produce plots that go into the 'plots' subfolder.
 
