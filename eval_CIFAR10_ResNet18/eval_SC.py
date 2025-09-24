@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from torch.utils.data import DataLoader, RandomSampler
 '''
-THIS FILE CREATES SOFTMAX COLLAPSE PLOTS FOR ALL THE MNIST MLP CROSS ENTROPY EXPERIMENTS.
+This file creates softmax collapse plots for all the mnist mlp cross entropy experiments.
 
-THIS FILE ASSUMES ALL THE MNIST MLP TRAIN SCRIPTS WERE RUN AS PROVIDED.
+This file assumes all the mnist mlp train scripts were run as provided.
 
-IF THIS IS NOT THE CASE:
-    UPDATE THE TUPLE LIST BELOW
-    (name, iterations, precision)
-    POSSIBLY ALSO UPDATE THE CHECKPOINTING SCHEME
+If this is not the case:
+    update the tuple list below
+        (name, iterations, precision)
+    possibly also update the checkpointing scheme
 
 Note that this can take quite a long time to run, especially for 64-bit networks.
 '''

@@ -9,17 +9,17 @@ from autoattack import AutoAttack
 from tqdm import tqdm
 from torch.utils.data import DataLoader, RandomSampler
 '''
-THIS FILE CREATES LOSS/ACCURACY PLOTS FOR ALL THE MNIST MLP EXPERIMENTS.
+This file creates loss/accuracy plots for all the mnist mlp experiments.
 
-IT PLOTS: TRAIN SET LOSS, TRAIN SET ACC, TEST SET ACC 
-AND ADVERSARIAL ACCURACY TO PGD AND SCALEDPGD (at eps=0.06 perturbation) WHERE APPLICABLE
+It plots: train set loss, train set acc, test set acc 
+and adversarial accuracy to pgd and scaledpgd (at eps=0.06 perturbation) where applicable
 
-THIS FILE ASSUMES ALL THE MNIST MLP TRAIN SCRIPTS WERE RUN AS PROVIDED.
+This file assumes all the mnist mlp train scripts were run as provided.
 
-IF THIS IS NOT THE CASE:
-    UPDATE THE TUPLE LIST BELOW
+If this is not the case:
+    update the tuple list below
     (name, iterations, loss_function, precision)
-    POSSIBLY ALSO UPDATE THE CHECKPOINTING SCHEME
+    possibly also update the checkpointing scheme
 '''
 
 experiments = [(f"MSE_Adam", int(1e2), "MSE", 32), ("MSE_AMSGrad", int(1e2), "MSE", 32),

@@ -6,14 +6,14 @@ import pickle
 from torch.utils.data import SubsetRandomSampler
 import matplotlib.pyplot as plt
 '''
-THIS FILE CREATES SOFTMAX COLLAPSE PLOTS FOR ALL THE MNIST MLP CROSS ENTROPY EXPERIMENTS.
+This file creates softmax collapse plots for all the mnist mlp cross entropy experiments.
 
-THIS FILE ASSUMES ALL THE MNIST MLP TRAIN SCRIPTS WERE RUN AS PROVIDED.
+This file assumes all the mnist mlp train scripts were run as provided.
 
-IF THIS IS NOT THE CASE:
-    UPDATE THE TUPLE LIST BELOW
-    (name, iterations, loss_function, precision)
-    POSSIBLY ALSO UPDATE THE CHECKPOINTING SCHEME
+If this is not the case:
+    update the tuple list below
+        (name, iterations, loss_function, precision)
+    possibly also update the checkpointing scheme
 '''
 
 experiments = [("CE_32", int(1e3), 32), ("CE_64", int(1e3), 64)]

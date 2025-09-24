@@ -13,15 +13,15 @@ from local_complexity import get_intersections_for_hulls
 from samplers import get_ortho_hull_around_samples, get_ortho_hull_around_samples_w_orig
 
 '''
-THIS FILE CREATES LOCAL COMPLEXITY PLOTS FOR ALL THE MNIST MLP EXPERIMENTS.
+This file creates local complexity plots for all the mnist mlp experiments.
 
-THIS FILE USES A LOT OF CODE FROM HUMAYUN ET AL. (https://github.com/AhmedImtiazPrio/grok-adversarial)
+This file uses a lot of code from humayun et al. (https://github.com/ahmedimtiazprio/grok-adversarial)
 
-THIS FILE ASSUMES ALL THE MNIST MLP TRAIN SCRIPTS WERE RUN AS PROVIDED.
+This file assumes all the mnist mlp train scripts were run as provided.
 
-IF THIS IS NOT THE CASE:
-    UPDATE THE LIST (EXPERIMENT, N_ITERATIONS) BELOW
-    POSSIBLY ALSO UPDATE THE CHECKPOINTING SCHEME
+If this is not the case:
+    update the list (experiment, n_iterations) below
+    possibly also update the checkpointing scheme
 '''
 
 experiments = [(f"MSE_eps={1e-8}", int(1e3)), ("MSE_eps=AMSGrad", int(1e3)), ("CE_32", int(1e3)), ("CE_64", int(1e3))]

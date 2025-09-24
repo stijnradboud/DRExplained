@@ -7,13 +7,13 @@ import math
 import matplotlib.pyplot as plt
 
 '''
-THIS FILE CREATES DEAD NEURON PLOTS FOR ALL THE MNIST MLP EXPERIMENTS.
+This file creates dead neuron plots for all the mnist mlp experiments.
 
-THIS FILE ASSUMES ALL THE MNIST MLP TRAIN SCRIPTS WERE RUN AS PROVIDED.
+This file assumes all the mnist mlp train scripts were run as provided.
 
-IF THIS IS NOT THE CASE:
-    UPDATE THE TUPLE LIST BELOW
-    POSSIBLY ALSO UPDATE THE CHECKPOINTING SCHEME
+If this is not the case:
+    update the tuple list below
+    possibly also update the checkpointing scheme
 '''
 
 experiments = [(f"MSE_eps={1e-8}", int(1e3)), ("MSE_eps=AMSGrad", int(1e3)), ("CE_32", int(1e3), ("CE_64", int(1e3)))]
@@ -29,7 +29,7 @@ def get_checkpoints(its_end):
             checkpoints.append(its)
     return checkpoints
 
-# HELPER FUNCTION
+# Helper function
 def check_dead_neurons_per_layer(model, train_loader, device=torch.device('cuda')):
     # assumes train_loader contains entire training set
     images, _ = next(iter(train_loader))
@@ -53,7 +53,7 @@ def check_dead_neurons_per_layer(model, train_loader, device=torch.device('cuda'
         
     return dead_per_layer, dead_total
 
-# DATALOADER
+# dataloader
 train_dataset = torchvision.datasets.MNIST(root='../datasets', 
                                            train=True, 
                                            transform=transforms.ToTensor(),  
@@ -67,7 +67,7 @@ train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1000,
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-# CALCULATE DEAD NEURONS PER EXPERIMENT
+# Calculate dead neurons
 results = []
 for exp, its_end in experiments:
     checkpoints = get_checkpoints(its_end)
