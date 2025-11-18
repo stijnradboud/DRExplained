@@ -54,7 +54,7 @@ def start_train_loop(loss_fn="CE", optim="Adam", prec=32, its_end=int(1e3), devi
                     nn.Linear(hidden_size, num_classes)
                 )
             
-        train_network(model, "MNIST", train_loader, loss_fn, optim, prec, its_end, device, save_optimizer=save_optimizer)
+        train_network(model, "MNIST", train_loader, loss_fn, optim, prec, its_end, device, save_optimizer=save_optimizers)
                     
     except Exception as e:
         with open("error_log.txt", "a") as f:
