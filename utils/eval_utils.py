@@ -19,7 +19,7 @@ def get_checkpoints(its_end):
     return checkpoints
 
 # function to use auto attack
-def test_model_APGD(model_dir, i, test_loader, eps=0.06, verbose=False, device=torch.device("cuda:0")):
+def test_model_AAPlus(model_dir, i, test_loader, eps=0.06, verbose=False, device=torch.device("cuda:0"), only_APGD = False):
     
     model = torch.load(f"{model_dir}/model_at_{i}_its.ckpt", weights_only=False, map_location=device)
 
@@ -32,8 +32,9 @@ def test_model_APGD(model_dir, i, test_loader, eps=0.06, verbose=False, device=t
     y_test = torch.cat(l, 0)
 
      
-    adversary = AutoAttack(lambda x: feed_model(x, model), norm='Linf', eps=eps, version='plus', verbose=verbose)  
-    adversary.attacks_to_run = ['apgd-ce']
+    adversary = AutoAttack(lambda x: feed_model(x, model), norm='Linf', eps=eps, version='plus', verbose=verbose)
+    if only_APGD:
+        adversary.attacks_to_run = ['apgd-ce']
     adversary.seed = 42
             
     with torch.no_grad():
@@ -269,7 +270,7 @@ def check_dead_neurons(model, train_loader, prec, device=torch.device('cuda')):
         
     return dead_per_layer, dead_total
 
-def plot_metrics(metrics, checkpoints, loss_fn, file_name, APGD_Accs = None):
+def plot_metrics(metrics, checkpoints, loss_fn, file_name, AA_accs = None):
     train_acc = [r[0] for r in metrics]
     test_acc = [r[1] for r in metrics]
     train_loss = [r[2] for r in metrics]
@@ -282,9 +283,9 @@ def plot_metrics(metrics, checkpoints, loss_fn, file_name, APGD_Accs = None):
     axs.plot(checkpoints, test_acc, color='orange', label='Test Accuracy')
     axs.plot(checkpoints, adv_acc_PGD, color='red', label='Adv. Accuracy (PGD, ε = 0.06)')
     if loss_fn == "CE": 
-        axs.plot(checkpoints, adv_acc_ScaledPGD, color='purple', label='Adv. Accuracy (ScaledPGD, , ε = 0.06)')
-    if APGD_Accs is not None:
-        axs.plot(checkpoints, APGD_Accs, color='purple', label='Adv. Accuracy (Auto-PGD, , ε = 0.06)')
+        axs.plot(checkpoints, adv_acc_ScaledPGD, color='purple', label='Adv. Accuracy (ScaledPGD, ε = 0.06)')
+    if AA_accs is not None:
+        axs.plot(checkpoints, AA_accs, color='purple', label='Adv. Accuracy (AA+, ε = 0.06)')
     axs.set_xscale("log")
     axs.set_xlabel("Optimizer Iterations")
     axs.set_ylabel("Accuracy (%)")

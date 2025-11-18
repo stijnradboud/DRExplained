@@ -4,12 +4,15 @@ import torch.nn.functional as F
 import os
 import math
 
-def train_network(model, ID, train_loader, loss_fn="CE", optim="Adam", prec=32, its_end=int(1e3), device=torch.device("cuda:0")):
+def train_network(model, ID, train_loader, loss_fn="CE", optim="Adam", prec=32, its_end=int(1e3), device=torch.device("cuda:0"), save_optimizer = False):
 
     out_file=f"logs/output_{ID}_{loss_fn}_{optim}_{prec}.txt"
     modeldir = f"checkpoints/models_{ID}/models_{loss_fn}_{optim}_{prec}"
-
     os.makedirs(modeldir, exist_ok=True)
+
+    if save_optimizer:
+        optimdir = f"checkpoints/optimizers_{ID}/optimizers_{loss_fn}_{optim}_{prec}"
+        os.makedirs(optimdir, exists_ok=True)
 
     with open(out_file, "w") as f:
             f.write(f"Starting at {strftime('%H:%M:%S', localtime())}\n")
@@ -74,6 +77,9 @@ def train_network(model, ID, train_loader, loss_fn="CE", optim="Adam", prec=32, 
 
             if log:
                 torch.save(model, f'{modeldir}/model_at_{its}_its.ckpt')
+
+                if save_optimizer:
+                    torch.save(optimizer, f'{optimdir}/model_at_{its}_its.optim')
 
                 with open(out_file, "a") as f:
                     f.write(f"\tits: {its} at at {strftime('%H:%M:%S', localtime())}\n")

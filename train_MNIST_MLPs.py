@@ -8,13 +8,16 @@ import torch.multiprocessing as mp
 from utils.train_utils import train_network
 
 # List of models to train in parallel (loss_fn ("CE"/"MSE"), optim ("Adam"/"AMSGrad"), precision (32/64), iterations (int))
-experiments = [("CE", "Adam", 32, int(1e3)), ("CE", "Adam", 64, int(1e3)),
-               ("MSE", "Adam", 32, int(1e3)), ("MSE", "AMSGrad", 32, int(1e3))]
+experiments = [("CE", "Adam", 32, int(1e6)), ("CE", "Adam", 64, int(1e6)),
+               ("MSE", "Adam", 32, int(1e7)), ("MSE", "AMSGrad", 32, int(1e7))]
 
 # If you run out of (cuda) memory, run one at a time individually or change device logic below.
 
 # This is the configuration used in the paper.
 # experiments = [("CE", "Adam", 32, int(1e6)), ("CE", "Adam", 64, int(1e6)), ("MSE", "Adam", 32, int(1e7)), ("MSE", "AMSGrad", 32, int(1e7))]
+
+# wether to save optimizers as well as models at checkpoints (default False):
+save_optimizers = True
 
 def start_train_loop(loss_fn="CE", optim="Adam", prec=32, its_end=int(1e3), device='cuda:0'):
     try:
@@ -51,7 +54,7 @@ def start_train_loop(loss_fn="CE", optim="Adam", prec=32, its_end=int(1e3), devi
                     nn.Linear(hidden_size, num_classes)
                 )
             
-        train_network(model, "MNIST", train_loader, loss_fn, optim, prec, its_end, device)
+        train_network(model, "MNIST", train_loader, loss_fn, optim, prec, its_end, device, save_optimizer=save_optimizer)
                     
     except Exception as e:
         with open("error_log.txt", "a") as f:

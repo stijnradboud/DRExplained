@@ -1,4 +1,4 @@
-from utils.eval_utils import get_checkpoints, get_metrics, get_SC_results, plot_metrics, test_model_APGD
+from utils.eval_utils import get_checkpoints, get_metrics, get_SC_results, plot_metrics, test_model_AAPlus
 from tqdm import tqdm
 import torch
 import matplotlib.pyplot as plt
@@ -76,15 +76,15 @@ def evaluate_and_plot_checkpoints(loss_fn = "CE", optim="Adam", prec=32, its_end
         metrics = get_metrics(model_dir, checkpoints, train_loader, test_loader, device, loss_fn=loss_fn, prec=prec)
 
         if loss_fn == "MSE":
-            print("\tAA+'s APGD attack...")
-            APGD_accs = []
+            print("\tAA+ attack...")
+            AA_accs = []
             for its in tqdm(checkpoints):
-                apgd_acc = test_model_APGD(model_dir, its, test_loader, device=device)
-                APGD_accs.append(apgd_acc)
+                aa_acc = test_model_AAPlus(model_dir, its, test_loader, device=device)
+                AA_accs.append(aa_acc)
         else:
-            APGD_accs = None
+            AA_accs = None
 
-        plot_metrics(metrics, checkpoints, loss_fn, f"CIFAR10 ResNet18 - {ID}", APGD_Accs=APGD_accs)
+        plot_metrics(metrics, checkpoints, loss_fn, f"CIFAR10 ResNet18 - {ID}", APGD_Accs=AA_accs)
             
 
     if analyse_softmax_collapse and loss_fn == "CE":
