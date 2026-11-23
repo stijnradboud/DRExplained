@@ -1,5 +1,5 @@
 # Is Delayed Robustness Really Grokking?
-## Authors anonymized until publication.
+## Stijn van den Beemt, Twan van Laarhoven, Marco Loog - Data Science Group - Radboud University Nijmegen.
 
 This is the repository for the paper "Is Delayed Robustness Really Grokking?".
 

@@ -19,6 +19,10 @@ experiments = [("CE", "Adam", 32, int(1e6)), ("CE", "Adam", 64, int(1e6)),
 # wether to save optimizers as well as models at checkpoints (default False):
 save_optimizers = True
 
+# wether to obtain PGD or AA results at every train it. 
+track_PGD = False
+track_AA = False
+
 def start_train_loop(loss_fn="CE", optim="Adam", prec=32, its_end=int(1e3), device='cuda:0'):
     try:
         train_dataset = torchvision.datasets.MNIST(root='datasets', 
@@ -28,15 +32,29 @@ def start_train_loop(loss_fn="CE", optim="Adam", prec=32, its_end=int(1e3), devi
                                                         transforms.Lambda(lambda x: x.view(-1))
                                                     ]),
                                                     download=True)
-                
         # Load the 1000 indices
         with open('datasets/subsample_train_indices.pkl', 'rb') as f:
             subsample_train_indices = pickle.load(f)
             
-        # Data loader
+        # Data loader for training
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=200, 
-                                                    sampler=SubsetRandomSampler(subsample_train_indices))     
-            
+                                                    sampler=SubsetRandomSampler(subsample_train_indices))   
+        if track_PGD or track_AA: 
+            test_dataset = torchvision.datasets.MNIST(root='datasets', 
+                                                        train=False, 
+                                                        transform=transforms.Compose([
+                                                            transforms.ToTensor(),
+                                                            transforms.Lambda(lambda x: x.view(-1))
+                                                        ]),
+                                                        download=True)
+            with open('datasets/subsample_test_indices.pkl', 'rb') as f:
+                subsample_test_indices = pickle.load(f)
+            # Data loader for training
+            adv_test_loader = torch.utils.data.DataLoader(train_dataset, batch_size=200, 
+                                                    sampler=SubsetRandomSampler(subsample_test_indices))
+        else: 
+            adv_test_loader = None
+          
         # Seed for the model
         seed = 42
         
@@ -53,8 +71,8 @@ def start_train_loop(loss_fn="CE", optim="Adam", prec=32, its_end=int(1e3), devi
                     nn.Linear(hidden_size, hidden_size), nn.ReLU(),
                     nn.Linear(hidden_size, num_classes)
                 )
-            
-        train_network(model, "MNIST", train_loader, loss_fn, optim, prec, its_end, device, save_optimizer=save_optimizers)
+
+        train_network(model, "MNIST", train_loader, loss_fn, optim, prec, its_end, device, save_optimizer=save_optimizers, attack_PGD=track_PGD, attack_AA=track_AA, adv_test_loader=adv_test_loader)
                     
     except Exception as e:
         with open("error_log.txt", "a") as f:

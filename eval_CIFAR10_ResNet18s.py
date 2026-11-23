@@ -84,7 +84,7 @@ def evaluate_and_plot_checkpoints(loss_fn = "CE", optim="Adam", prec=32, its_end
         else:
             AA_accs = None
 
-        plot_metrics(metrics, checkpoints, loss_fn, f"CIFAR10 ResNet18 - {ID}", APGD_Accs=AA_accs)
+        plot_metrics(metrics, checkpoints, loss_fn, f"CIFAR10 ResNet18 - {ID}", AA_Accs=AA_accs)
             
 
     if analyse_softmax_collapse and loss_fn == "CE":

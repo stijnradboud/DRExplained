@@ -28,6 +28,9 @@ analyse_local_complexity = True
 analyse_dead_neurons = True
 analyse_softmax_collapse = True
 
+# Optional, set the nr of PGD steps in default PGD and ScaledPGD attacks (default = 10), Humayun et al used 100.
+PGD_steps = 10
+
 def evaluate_and_plot_checkpoints(loss_fn = "CE", optim="Adam", prec=32, its_end=int(1e3), device=torch.device("cuda:0")):
  
     if prec == 32:
@@ -65,14 +68,17 @@ def evaluate_and_plot_checkpoints(loss_fn = "CE", optim="Adam", prec=32, its_end
 
     model_dir = f"checkpoints/models_MNIST/models_{ID}"
 
+    if PGD_steps != 10:
+        ID += f"_{PGD_steps}_steps"
+
     print(f"Evaluating {ID}...")
     checkpoints = get_checkpoints(its_end)
 
     if analyse_general_metrics:
         print("\tAccuracies, losses and adversarial accuracies...")
-        metrics = get_metrics(model_dir, checkpoints, train_loader, test_loader, device, loss_fn=loss_fn, prec=prec)
+        metrics = get_metrics(model_dir, checkpoints, train_loader, test_loader, device, loss_fn=loss_fn, prec=prec, PGD_steps = PGD_steps)
 
-        plot_metrics(metrics, checkpoints, loss_fn, f"MNIST MLP - {ID}")
+        plot_metrics(metrics, checkpoints, loss_fn, file_name=f"MNIST MLP - {ID}")
 
     if analyse_local_complexity:
         print(f"\tLC Analysis...")

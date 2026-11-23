@@ -1,7 +1,7 @@
 import math
 import torch
 import torch.nn.functional as F
-from utils.attacks import PGD, ScaledPGD
+from utils.attacks import PGD, ScaledPGD, PGD_with_restarts, ScaledPGD_with_restarts
 from autoattack import AutoAttack
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -19,9 +19,10 @@ def get_checkpoints(its_end):
     return checkpoints
 
 # function to use auto attack
-def test_model_AAPlus(model_dir, i, test_loader, eps=0.06, verbose=False, device=torch.device("cuda:0"), only_APGD = False):
+def test_model_AAPlus(model_dir, i, test_loader, eps=0.06, verbose=False, device=torch.device("cuda:0"), only_APGD = False, model = None):
     
-    model = torch.load(f"{model_dir}/model_at_{i}_its.ckpt", weights_only=False, map_location=device)
+    if model is None:
+        model = torch.load(f"{model_dir}/model_at_{i}_its.ckpt", weights_only=False, map_location=device)
 
     def feed_model(data, model):
         return model(data)
@@ -57,9 +58,37 @@ def test_model_AAPlus(model_dir, i, test_loader, eps=0.06, verbose=False, device
 
     return accuracy
 
-# function to get metrics
-def get_metrics(model_dir, to_log, train_dataloader, test_dataloader, device, e=0.06, loss_fn="CE", prec=32):    
+# function to do simply one pass on a model
+def test_model_PGD(model, test_dataloader, device, e=0.06, PGD_steps=10, alpha=0.0156):    
+
+    get_att_PGD = lambda model: PGD(model, e, alpha=alpha, steps=PGD_steps, dmax=1, dmin=0)
+
+    att_PGD = get_att_PGD(model)
     
+    correct_adv_PGD = 0
+    total_test = 0
+    
+    model.eval()
+
+    for images, labels in test_dataloader:
+        images = images.to(device)
+        labels = labels.to(device)
+
+        adv_images_pgd = att_PGD(images, labels)
+
+        # Adversarial accuracy 32-bit PGD
+        with torch.no_grad():
+            adv_outputs = model(adv_images_pgd)
+            _, predicted = torch.max(adv_outputs.data, 1)
+            correct_adv_PGD += (predicted == labels).sum().item()
+
+        total_test += labels.size(0)
+        
+    return (100 * correct_adv_PGD / total_test)
+
+# function to get metrics
+def get_metrics(model_dir, to_log, train_dataloader, test_dataloader, device, e=0.06, loss_fn="CE", prec=32, PGD_steps=10, restarts=1, alpha=0.0156):    
+    # default alpha = step size = value from Humayun et al.
     if prec == 32:
         image_dtype = torch.float32
     elif prec == 64:
@@ -68,8 +97,12 @@ def get_metrics(model_dir, to_log, train_dataloader, test_dataloader, device, e=
         print("unsupported precision")
         return -1
     
-    get_att_PGD = lambda model: PGD(model, e, alpha=0.0156, steps=10, dmax=1, dmin=0)
-    get_att_ScaledPGD = lambda model: ScaledPGD(model, e, alpha=0.0156, steps=10, dmax=1, dmin=0)
+    if restarts > 1:
+        get_att_PGD = lambda model: PGD_with_restarts(model, e, alpha=alpha, steps=PGD_steps, dmax=0, dmin=0, dtype=image_dtype)
+        get_att_ScaledPGD = lambda model: ScaledPGD_with_restarts(model, e, alpha=alpha, steps=PGD_steps, dmax=0, dmin=0, dtype=image_dtype)
+    else:
+        get_att_PGD = lambda model: PGD(model, e, alpha=alpha, steps=PGD_steps, dmax=1, dmin=0)
+        get_att_ScaledPGD = lambda model: ScaledPGD(model, e, alpha=alpha, steps=PGD_steps, dmax=1, dmin=0)
 
     if loss_fn == "CE":
         criterion = torch.nn.CrossEntropyLoss()
@@ -258,14 +291,16 @@ def check_dead_neurons(model, train_loader, prec, device=torch.device('cuda')):
     dead_total = 0
 
     model.eval()
+
     for i, layer in enumerate(model):
         with torch.no_grad():
             output = layer(inp)
-        if i % 2:
-            dead_neurons = (output == 0).all(dim=0)
+        if isinstance(layer, torch.nn.Linear):
+            print(layer)
+            dead_neurons = (output <= 0).all(dim=0)
             num_dead = dead_neurons.sum().item()
             dead_per_layer.append(num_dead)
-            dead_total += num_dead
+            dead_total += dead_per_layer
         inp = output
         
     return dead_per_layer, dead_total
